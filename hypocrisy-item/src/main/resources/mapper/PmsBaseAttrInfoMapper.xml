@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hypocrisy.maven.hypocirsyitem.mapper.PmsBaseAttrInfoMapper">
+    <select id="selectBySkuIds" resultMap="pmsBaseAttrInfo">
+        select
+        pms_base_attr_info.id as attr_id,
+        pms_base_attr_info.attr_name,
+        pbav1.id as value_id,
+        pbav1.value_name,
+        if(pbav2.id, 1, 0) as 'isCheck'
+        from pms_sku_attr_value
+        left join pms_base_attr_info
+        on pms_sku_attr_value.attr_id = pms_base_attr_info.id
+        left join pms_base_attr_value as pbav1
+        on pms_sku_attr_value.value_id = pbav1.id
+        left join (	 select * from pms_sku_attr_value where sku_id  = #{useSpuId}) pbav2
+        on pms_sku_attr_value.value_id = pbav2.value_id
+        where pms_sku_attr_value.sku_id
+        <foreach item="id" collection="ids" open="in (" close=")" separator=",">
+            ${id}
+        </foreach>
+    </select>
+    <resultMap id="pmsBaseAttrInfo" type="bean.PmsBaseAttrInfo" autoMapping="true">
+        <id property="id" column="attr_id"/>
+        <collection property="pmsBaseAttrValueList" ofType="bean.PmsBaseAttrValue" autoMapping="true">
+            <id property="id" column="value_id"/>
+            <result property="attrId" column="attr_id"/>
+        </collection>
+    </resultMap>
+</mapper>

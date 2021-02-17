@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hypocrisy.maven.hypocirsyitem.mapper.PmsSkuInfoMapper">
+
+
+    <select id="selectBySpuIds" resultMap="pmsSkuInfoDetail">
+        select
+        pms_sku_info.id as sku_info_id, pms_sku_info.*, pms_product_info.spu_name as spu_name, pms_sku_repository.repository_total as repositoryTotal,
+        pms_sku_image.id as img_id, pms_product_image.img_url, pms_sku_image.is_default,
+        pms_sku_attr_value.id as sku_attr_id, pms_sku_attr_value.*, pms_base_attr_info.attr_name as attr_name, pms_base_attr_value.value_name as value_name
+        from pms_sku_info
+        left join pms_product_info
+        on pms_sku_info.spu_id = pms_product_info.id
+        left join pms_sku_image
+        on pms_sku_info.id = pms_sku_image.sku_id
+        left join pms_product_image
+        on pms_sku_image.spu_img_id = pms_product_image.id
+        left join pms_sku_attr_value
+        on pms_sku_info.id = pms_sku_attr_value.sku_id
+        left join pms_base_attr_info
+        on pms_sku_attr_value.attr_id = pms_base_attr_info.id
+        left join pms_base_attr_value
+        on pms_sku_attr_value.value_id = pms_base_attr_value.id
+        left join pms_sku_repository
+        on pms_sku_info.id = pms_sku_repository.sku_id
+        where pms_sku_info.spu_id
+        <foreach item="spuId" collection="pmsProductIds" open=" in (" separator="," close=")">
+            #{spuId}
+        </foreach>
+    </select>
+    <resultMap id="pmsSkuInfoDetail" type="bean.PmsSkuInfo" autoMapping="true">
+        <id property="id" column="sku_info_id"/>
+        <collection property="pmsSkuImageList" ofType="bean.PmsSkuImage" autoMapping="true">
+            <id property="id" column="img_id"/>
+        </collection>
+        <collection property="pmsSkuAttrValueList" ofType="bean.PmsSkuAttrValue" autoMapping="true">
+            <id property="id" column="sku_attr_id"/>
+        </collection>
+    </resultMap>
+    <select id="selectByValueIds" resultType="Integer">
+        select pms_sku_info.id from pms_sku_attr_value
+        left join pms_sku_info
+        on pms_sku_attr_value.sku_id = pms_sku_info.id
+        where pms_sku_info.spu_id = #{spuId} and value_id
+        <foreach item="valueId" collection="valueIds" open=" in (" separator="," close=")">
+            #{valueId}
+        </foreach>
+        GROUP BY pms_sku_info.id
+        having count(pms_sku_info.id) = ${valueIds.length}
+    </select>
+    <select id="selectByIds" resultMap="pmsSkuInfo_self_image">
+        select
+        pms_sku_info.id as id, pms_sku_info.*,
+        pms_sku_image.id as img_id, pms_product_image.img_url as img_url, pms_sku_image.*
+        from pms_sku_info
+        left join pms_sku_image
+        on pms_sku_info.id = pms_sku_image.sku_id
+        left join pms_product_image
+        on pms_sku_image.spu_img_id = pms_product_image.id
+        where pms_sku_info.id
+        <foreach item="id" collection="skuIds" open="in (" close=")" separator=",">
+            #{id}
+        </foreach>
+        and pms_sku_image.is_default = 1
+    </select>
+    <resultMap id="pmsSkuInfo_self_image" type="bean.PmsSkuInfo" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="pmsSkuImageList" ofType="bean.PmsSkuImage" autoMapping="true">
+            <id property="id" column="img_id"/>
+        </collection>
+
+    </resultMap>
+    <select id="selectAllByDefaultImage" resultMap="pmsSkuInfoDetail">
+        select
+            pms_sku_info.id as sku_info_id, pms_sku_info.*, pms_product_info.spu_name as spu_name, pms_sku_repository.repository_total as repositoryTotal,
+            pms_sku_image.id as img_id, pms_product_image.img_url, pms_sku_image.is_default,
+            pms_sku_attr_value.id as sku_attr_id, pms_sku_attr_value.*, pms_base_attr_info.attr_name as attr_name, pms_base_attr_value.value_name as value_name
+        from pms_sku_info
+                 left join pms_product_info
+                           on pms_sku_info.spu_id = pms_product_info.id
+                 left join pms_sku_image
+                           on pms_sku_info.id = pms_sku_image.sku_id
+                 left join pms_product_image
+                           on pms_sku_image.spu_img_id = pms_product_image.id
+                 left join pms_sku_attr_value
+                           on pms_sku_info.id = pms_sku_attr_value.sku_id
+                 left join pms_base_attr_info
+                           on pms_sku_attr_value.attr_id = pms_base_attr_info.id
+                 left join pms_base_attr_value
+                           on pms_sku_attr_value.value_id = pms_base_attr_value.id
+                 left join pms_sku_repository
+                           on pms_sku_info.id = pms_sku_repository.sku_id
+        where pms_sku_image.is_default = 1  and pms_sku_info.id in (
+            select min(id) from pms_sku_info GROUP BY spu_id
+        )
+    </select>
+</mapper>
