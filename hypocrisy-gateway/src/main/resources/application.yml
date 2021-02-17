@@ -1,0 +1,20 @@
+
+
+spring:
+  application:
+    name: hypocrisy-gateway
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.200.130:8848
+    gateway:
+      routes:
+        - id: hypocrisy-search
+          uri: lb://hypocrisy-search
+          predicates:
+            - Path=/search/**
+          filters:
+            - StripPrefix=1
+server:
+  port: 8000
