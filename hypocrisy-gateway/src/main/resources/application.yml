@@ -22,5 +22,7 @@ spring:
             - Path=/item/**
           filters:
             - StripPrefix=1
+  main:
+    allow-bean-definition-overriding: true
 server:
   port: 8000
