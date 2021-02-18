@@ -2,12 +2,12 @@ package shiro.realm;
 
 
 import bean.UmsMember;
+import feign.service.FeignUmsMemberService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
-import service.UmsMemberService;
 import shiro.token.JWTToken;
 import utils.JWTUtils;
 
@@ -19,7 +19,7 @@ import utils.JWTUtils;
 public class JWTRealm extends AuthorizingRealm {
 
     @Autowired(required = false)
-    private UmsMemberService umsMemberService;
+    private FeignUmsMemberService feignUmsMemberService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -39,7 +39,7 @@ public class JWTRealm extends AuthorizingRealm {
         if (!verify) {
             throw  new AuthenticationException("无效的token");
         }
-        UmsMember umsMember = umsMemberService.selectByUsername(username);
+        UmsMember umsMember = feignUmsMemberService.selectByUsername(username);
         if (umsMember == null) {
             throw new UnknownAccountException("无效的用户名");
         }

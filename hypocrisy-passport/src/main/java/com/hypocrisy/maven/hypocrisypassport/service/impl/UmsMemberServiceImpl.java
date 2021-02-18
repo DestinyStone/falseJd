@@ -4,9 +4,9 @@ import bean.UmsMember;
 import bean.UmsPermission;
 import com.hypocrisy.maven.hypocrisypassport.mapper.UmsMemberMapper;
 import com.hypocrisy.maven.hypocrisypassport.mapper.UmsPermissonMapper;
+import com.hypocrisy.maven.hypocrisypassport.service.UmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import service.UmsMemberService;
 
 /**
  * @Auther: DestinyStone

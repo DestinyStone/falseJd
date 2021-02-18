@@ -1,4 +1,4 @@
-package service;
+package com.hypocrisy.maven.hypocirsyitem.service;
 
 import response.Message;
 
@@ -50,13 +50,13 @@ public interface PmsSkuInfoService {
      * @return
      */
     Integer selectValueIds(String spuId, String[] valueIds);
-//
-//    /**
-//     * 获取多个skuId的商品
-//     * @param skuIds
-//     * @return
-//     */
-//    Message selectByIds(String[] skuIds);
+
+    /**
+     * 获取多个skuId的商品
+     * @param skuIds
+     * @return
+     */
+    Message selectByIds(String[] skuIds);
 //
 //    /**
 //     * 全部同步到es会使用该接口

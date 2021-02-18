@@ -1,14 +1,13 @@
 package com.hypocrisy.maven.hypocrisypassport.controller;
 
 import bean.UmsMember;
+import com.hypocrisy.maven.hypocrisypassport.service.UmsMemberService;
 import io.swagger.annotations.ApiOperation;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import response.Message;
 import response.type.ResponseCodeType;
 import utils.AccessControlUtils;
@@ -25,6 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @CrossOrigin
 public class PassportController {
+
+    @Autowired
+    private UmsMemberService umsMemberService;
 
     @ApiOperation("用户登录")
     @PostMapping(value = "/login", params = {"username!=", "password!="})
@@ -63,5 +65,16 @@ public class PassportController {
         UmsMember umsMember = (UmsMember)subject.getPrincipal();
         UmsMember umsMemberResult = UmsMember.builder().username(umsMember.getUsername()).build();
         return new Message(ResponseCodeType.SUCCESS, umsMemberResult, true);
+    }
+
+    @GetMapping("selectByUsername")
+    UmsMember selectByUsername(@RequestParam("username") String username){
+        return umsMemberService.selectByUsername(username);
+    }
+
+
+    @GetMapping("selectMemberPermission")
+    String selectMemberPermission(@RequestParam("permissionId") String permissionId){
+        return umsMemberService.selectMemberPermission(permissionId);
     }
 }

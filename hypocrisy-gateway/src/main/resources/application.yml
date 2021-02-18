@@ -22,6 +22,12 @@ spring:
             - Path=/item/**
           filters:
             - StripPrefix=1
+        - id: hypocrisy-cart
+          uri: lb://hypocrisy-cart
+          predicates:
+            - Path=/cart/**
+          filters:
+            - StripPrefix=1
   main:
     allow-bean-definition-overriding: true
 server:

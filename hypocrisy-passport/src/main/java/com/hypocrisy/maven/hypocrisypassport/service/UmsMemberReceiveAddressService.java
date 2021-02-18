@@ -1,4 +1,4 @@
-package service;
+package com.hypocrisy.maven.hypocrisypassport.service;
 
 import bean.UmsMemberReceiveAddress;
 import response.Message;

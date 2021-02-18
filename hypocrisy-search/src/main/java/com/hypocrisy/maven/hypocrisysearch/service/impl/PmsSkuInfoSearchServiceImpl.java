@@ -4,6 +4,7 @@ import bean.PmsBaseAttrInfo;
 import bean.PmsBaseAttrValue;
 import bean.PmsSkuAttrValue;
 import com.alibaba.fastjson.JSONObject;
+import com.hypocrisy.maven.hypocrisysearch.service.PmsSkuInfoSearchService;
 import document.PmsSkuInfoSearch;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchResponse;
@@ -25,7 +26,6 @@ import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilde
 import org.springframework.stereotype.Service;
 import response.Message;
 import response.type.ResponseCodeType;
-import service.PmsSkuInfoSearchService;
 
 import java.lang.reflect.Field;
 import java.util.*;

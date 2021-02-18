@@ -1,13 +1,13 @@
 package shiro.realm;
 
 import bean.UmsMember;
+import feign.service.FeignUmsMemberService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
-import service.UmsMemberService;
 
 /**
  * @Auther: DestinyStone
@@ -18,7 +18,7 @@ import service.UmsMemberService;
 public class UsernamePasswordRealm extends AuthorizingRealm {
 
     @Autowired(required = false)
-    private UmsMemberService umsMemberService;
+    private FeignUmsMemberService feignUmsMemberService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -27,7 +27,7 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        String permission = umsMemberService.selectMemberPermission(((UmsMember)principals.getPrimaryPrincipal()).getPermissionId());
+        String permission = feignUmsMemberService.selectMemberPermission(((UmsMember)principals.getPrimaryPrincipal()).getPermissionId());
         if (permission == null)
             return null;
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
@@ -39,7 +39,7 @@ public class UsernamePasswordRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
 
         final String username = token.getPrincipal().toString();
-        UmsMember umsMemberResult = umsMemberService.selectByUsername(username);
+        UmsMember umsMemberResult = feignUmsMemberService.selectByUsername(username);
         if (umsMemberResult == null) {
             throw new UnknownAccountException("未知的用户");
         }

@@ -1,4 +1,4 @@
-package service;
+package com.hypocrisy.maven.hypocrisycart.service;
 
 import bean.OmsCartItem;
 import response.Message;

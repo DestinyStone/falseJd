@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import response.Message;
 import response.type.ResponseCodeType;
-import service.PmsSkuInfoService;
+import com.hypocrisy.maven.hypocirsyitem.service.PmsSkuInfoService;
 
 /**
  * @Auther: DestinyStone
@@ -44,5 +44,13 @@ public class PmsSkuController {
         jsonObject.put("skuId", skuId);
 
         return new Message(ResponseCodeType.SUCCESS, jsonObject, true);
+    }
+
+    @PostMapping("/getPmsSkuInfoBySkuIds")
+    @ApiOperation("查找多个sku商品")
+    public Message getPmsSkuInfoBySkuIds(@RequestBody String[] skuIds) {
+        if (skuIds.length == 0)
+            return new Message(ResponseCodeType.SUCCESS, null, true);
+        return pmsSkuInfoService.selectByIds(skuIds);
     }
 }

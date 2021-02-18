@@ -1,4 +1,4 @@
-package com.hypocrisy.maven.hypocirsyitem.server.impl;
+package com.hypocrisy.maven.hypocirsyitem.service.impl;
 
 import bean.PmsBaseAttrInfo;
 import bean.PmsBaseAttrValue;
@@ -7,11 +7,11 @@ import bean.PmsSkuInfo;
 import com.hypocrisy.maven.hypocirsyitem.mapper.PmsBaseAttrInfoMapper;
 import com.hypocrisy.maven.hypocirsyitem.mapper.PmsSkuImageMapper;
 import com.hypocrisy.maven.hypocirsyitem.mapper.PmsSkuInfoMapper;
+import com.hypocrisy.maven.hypocirsyitem.service.PmsSkuInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import response.Message;
 import response.type.ResponseCodeType;
-import service.PmsSkuInfoService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -70,5 +70,11 @@ public class PmsSkuInfoServiceImpl implements PmsSkuInfoService {
     public Integer selectValueIds(String spuId, String[] valueIds) {
         Integer i = pmsSkuInfoMapper.selectByValueIds(spuId, valueIds);
         return i;
+    }
+
+    @Override
+    public Message selectByIds(String[] skuIds) {
+        List<PmsSkuInfo> pmsSkuInfoList = pmsSkuInfoMapper.selectByIds(skuIds);
+        return new Message(ResponseCodeType.SUCCESS, pmsSkuInfoList, true );
     }
 }

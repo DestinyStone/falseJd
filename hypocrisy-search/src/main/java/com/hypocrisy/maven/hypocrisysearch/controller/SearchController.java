@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import response.Message;
 import response.type.ResponseCodeType;
-import service.PmsSkuInfoSearchService;
+import com.hypocrisy.maven.hypocrisysearch.service.PmsSkuInfoSearchService;
 
 /**
  * @Auther: DestinyStone

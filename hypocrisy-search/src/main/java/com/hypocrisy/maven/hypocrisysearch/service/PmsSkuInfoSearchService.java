@@ -1,4 +1,4 @@
-package service;
+package com.hypocrisy.maven.hypocrisysearch.service;
 
 import response.Message;
 

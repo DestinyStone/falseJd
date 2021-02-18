@@ -1,16 +1,12 @@
-package service;
+package com.hypocrisy.maven.hypocrisypassport.service;
 
 import bean.UmsMember;
-import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @Auther: DestinyStone
  * @Date: 2020/10/17 21:27
  * @Description:
  */
-@FeignClient(name = "hypocrisy-passport")
 public interface UmsMemberService {
 //    /**
 //     * 验证是否能够激活
@@ -62,16 +58,14 @@ public interface UmsMemberService {
      * @param username
      * @return
      */
-    @GetMapping("selectByUsername")
-    UmsMember selectByUsername(@RequestParam("username") String username);
+    UmsMember selectByUsername(String username);
 
     /**
      * 查询用户权限
      * @param permissionId
      * @return
      */
-    @GetMapping("selectMemberPermission")
-    String selectMemberPermission(@RequestParam("permissionId") String permissionId);
+    String selectMemberPermission(String permissionId);
 
 //    /**
 //     * 返回用户id
