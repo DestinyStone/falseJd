@@ -1,8 +1,11 @@
 package feign.service;
 
 import bean.UmsMember;
+import bean.UmsMemberReceiveAddress;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -18,7 +21,7 @@ public interface FeignUmsMemberService {
      * @param username
      * @return
      */
-    @GetMapping("selectByUsername")
+    @GetMapping("/selectByUsername")
     UmsMember selectByUsername(@RequestParam("username") String username);
 
     /**
@@ -28,4 +31,7 @@ public interface FeignUmsMemberService {
      */
     @GetMapping("selectMemberPermission")
     String selectMemberPermission(@RequestParam("permissionId")String permissionId);
+
+    @PostMapping("/selectOne")
+    UmsMemberReceiveAddress selectOne(@RequestBody UmsMemberReceiveAddress umsMemberReceiveAddressQuery);
 }

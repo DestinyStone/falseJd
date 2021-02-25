@@ -84,4 +84,9 @@ public class UmsMemberReceiveAddressServiceImpl implements UmsMemberReceiveAddre
         umsMemberReceiveAddressMapper.updateByExampleSelective(umsMemberReceiveAddressQuery, example);
         return new Message(ResponseCodeType.SUCCESS, null, true);
     }
+
+    @Override
+    public UmsMemberReceiveAddress selectOne(UmsMemberReceiveAddress umsMemberReceiveAddressQuery) {
+        return umsMemberReceiveAddressMapper.selectOne(umsMemberReceiveAddressQuery);
+    }
 }

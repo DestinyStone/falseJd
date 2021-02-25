@@ -39,4 +39,6 @@ public interface UmsMemberReceiveAddressService {
      * @return
      */
     Message updateDefaultStatusByUserIdAndId(String userId, String id);
+
+    UmsMemberReceiveAddress selectOne(UmsMemberReceiveAddress umsMemberReceiveAddressQuery);
 }

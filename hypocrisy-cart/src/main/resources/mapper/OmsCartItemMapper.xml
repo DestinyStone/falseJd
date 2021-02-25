@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hypocrisy.maven.hypocrisycart.mapper.OmsCartItemMapper">
+
+    <update id="decrByRepository">
+        update pms_sku_repository
+        set repository_total = repository_total - #{repository,jdbcType=INTEGER},
+            lock_total = lock_total + #{repository,jdbcType=INTEGER}
+        where sku_id = #{skuId}
+    </update>
+    <select id="selectBySkuIdsAndUserId" resultType="bean.OmsCartItem">
+        select * from
+            oms_cart_item
+        where member_id = #{userId} and product_sku_id
+        <foreach collection="skuIds" item="skuId" open="in (" separator="," close=")">
+            #{skuId}
+        </foreach>
+    </select>
+</mapper>

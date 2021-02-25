@@ -2,7 +2,6 @@ package com.hypocrisy.maven.hypocrisycart.controller;
 
 import bean.OmsCartItem;
 import bean.PmsSkuInfo;
-import bean.UmsMember;
 import com.alibaba.fastjson.JSONObject;
 import com.hypocrisy.maven.hypocrisycart.service.OmsCartItemService;
 import feign.service.FeignPmsSkuInfoService;
@@ -10,12 +9,12 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.annotation.RequiresAuthentication;
-import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import response.Message;
+import security.details.UmsMemberDetails;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +36,12 @@ public class CartController {
     private OmsCartItemService omsCartItemService;
 
     @PostMapping("/addCart")
-    @RequiresAuthentication
+    @PreAuthorize("isAuthenticated()")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "token标记", required = true) })
     @ApiOperation("添加商品到购物车")
-    public Message addCart(@RequestBody List<OmsCartItem> cartItemList) {
+    public Message addCart(@RequestBody List<OmsCartItem> cartItemList, @AuthenticationPrincipal UmsMemberDetails umsMemberDetails) {
 
-        Subject subject = SecurityUtils.getSubject();
-        final String userId = ((UmsMember) subject.getPrincipal()).getId();
+        final String userId = umsMemberDetails.getUmsMemberPortion().getId();
 
         final List<OmsCartItem> cartItemListQuery = cartItemList.stream()
                 .filter(cartItem -> !StringUtils.isBlank(cartItem.getProductSkuId()) && cartItem.getQuantity() > 0)
@@ -67,12 +65,11 @@ public class CartController {
     }
 
     @GetMapping("/getCart")
-    @RequiresAuthentication
+    @PreAuthorize("isAuthenticated()")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "token", value = "token标记", required = true) })
     @ApiOperation("获取购物车")
-    public Message getCart() {
-        Subject subject = SecurityUtils.getSubject();
-        final String userId = ((UmsMember) subject.getPrincipal()).getId();
+    public Message getCart(@AuthenticationPrincipal UmsMemberDetails umsMemberDetails) {
+        final String userId = umsMemberDetails.getUmsMemberPortion().getId();
 
         return omsCartItemService.selectByUserId(userId);
     }

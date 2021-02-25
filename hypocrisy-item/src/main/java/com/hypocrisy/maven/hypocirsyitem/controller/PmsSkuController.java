@@ -1,12 +1,13 @@
 package com.hypocrisy.maven.hypocirsyitem.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.hypocrisy.maven.hypocirsyitem.cache.annon.EnableBasicCache;
+import com.hypocrisy.maven.hypocirsyitem.service.PmsSkuInfoService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import response.Message;
 import response.type.ResponseCodeType;
-import com.hypocrisy.maven.hypocirsyitem.service.PmsSkuInfoService;
 
 /**
  * @Auther: DestinyStone
@@ -22,12 +23,14 @@ public class PmsSkuController {
 
     @GetMapping(value = "/getPmsSkuInfoById", params = {"id!="})
     @ApiOperation("根据skuId查询商品")
+    @EnableBasicCache(prefix = "pms_sku_info", privateKey = "id")
     public Message getPmsSkuInfoById(@RequestParam("id") String id) {
         return pmsSkuInfoService.selectById(id);
     }
 
     @GetMapping(value="/getPmsSkuAttrListBySkuId", params = {"id!="})
     @ApiOperation("查询当前系列商品下的所有销售属性")
+    @EnableBasicCache(prefix = "pms_sku_attr", privateKey = "id")
     public Message getPmsSkuAttrListBySkuId(@RequestParam("id") String id) {
         return pmsSkuInfoService.selectAllSkuAttrListById(id);
     }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hypocrisy.maven.hypocrisyorder.mapper.OmsOrderMapper">
+
+    <resultMap id="BasicOrder" type="bean.OmsOrder" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="omsOrderItems" ofType="bean.OmsOrderItem" autoMapping="true">
+            <id property="id" column="oms_order_item_id"/>
+            <association property="pmsSkuInfo" javaType="bean.PmsSkuInfo" autoMapping="true">
+                <id property="id" column="pms_sku_info_id"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <update id="updateOrderStatus">
+        update oms_order set
+            `status` = #{status}
+        where
+            order_sn = #{orderNo}
+    </update>
+    <select id="selectContainOrderItem" resultMap="BasicOrder">
+        select
+            oms_order.id as id,
+            oms_order_item.id as oms_order_item_id,
+            pms_sku_info.id as pms_sku_info_id,
+            oms_order.*, oms_order_item.*, pms_sku_info.*
+        from oms_order
+             left join oms_order_item
+                on oms_order.id = oms_order_item.order_id
+             join pms_sku_info
+                on pms_sku_info.id = oms_order_item.product_sku_id
+             left join pms_sku_image
+                on pms_sku_info.id = pms_sku_image.sku_id
+             join pms_product_image
+                on pms_product_image.id = pms_sku_image.spu_img_id
+        where oms_order.id
+        <foreach collection="orderIds" item="orderId" open="in (" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </select>
+
+    <select id="selectByUserIdAndStatusAndSkuName" resultMap="BasicOrder">
+        select
+            oms_order.id as id,
+            oms_order_item.id as oms_order_item_id,
+            pms_sku_info.id as pms_sku_info_id,
+            oms_order.*, oms_order_item.*, pms_sku_info.*
+        from oms_order
+            left join oms_order_item
+                on oms_order.id = oms_order_item.order_id
+            left join pms_sku_info
+                on pms_sku_info.id = oms_order_item.product_sku_id
+        <where>
+            oms_order.member_id = #{userId}
+            <if test="filter != null and filter != ''">
+                and oms_order.status = #{filter}
+            </if>
+            <if test="search != null and search != ''">
+                and pms_sku_info.sku_name like #{search} or oms_order.order_sn like #{search}
+            </if>
+        </where>
+    </select>
+</mapper>

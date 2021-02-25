@@ -33,4 +33,10 @@ public interface OmsCartItemService {
      * @return
      */
     Message updateCartTotal(String userId, String id, Integer skuTotal);
+
+    void decrByRepository(String productSkuId, Integer quantity);
+
+    List<OmsCartItem> selectBySkuIdsAndUserId(String userId, String[] skuIds);
+
+    void deleteByPrimaryKey(OmsCartItem omsCartItem);
 }
