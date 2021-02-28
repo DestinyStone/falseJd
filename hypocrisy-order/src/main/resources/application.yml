@@ -1,0 +1,21 @@
+seata:
+  enabled: true
+  application-id: hypocrisy-order
+  tx-service-group: hypocrisy-order-group
+  enable-auto-data-source-proxy: true
+  config:
+    type: nacos
+    nacos:
+      namespace: 4c762ce2-8453-46f8-b1f1-0bdc9964e6e5
+      server-addr: 192.168.200.130:8848
+      group: SEATA_GROUP
+      userName: "nacos"
+      password: "nacos"
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 192.168.200.130:8848
+      namespace: 4c762ce2-8453-46f8-b1f1-0bdc9964e6e5
+      userName: "nacos"
+      password: "nacos"

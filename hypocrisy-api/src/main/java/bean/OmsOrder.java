@@ -19,7 +19,6 @@ import java.util.List;
 @Builder
 public class OmsOrder implements Serializable {
 
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Id
   @Column
   private String id;

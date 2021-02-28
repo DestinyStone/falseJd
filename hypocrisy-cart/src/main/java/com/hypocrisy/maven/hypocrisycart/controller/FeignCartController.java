@@ -35,6 +35,5 @@ public class FeignCartController {
     public void deleteByPrimaryKey(@RequestBody OmsCartItem omsCartItem) {
         System.out.println( RootContext.getXID() + "----------------------------------------");
         omsCartItemService.deleteByPrimaryKey(omsCartItem);
-        throw new RuntimeException("3333333");
     }
 }

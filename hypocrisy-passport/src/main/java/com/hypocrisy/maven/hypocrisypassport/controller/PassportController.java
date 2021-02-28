@@ -73,4 +73,12 @@ public class PassportController {
     public Message getUser(@AuthenticationPrincipal UmsMemberDetails umsMemberDetails) {
         return new Message(ResponseCodeType.SUCCESS, umsMemberDetails.getUmsMemberPortion(), true);
     }
+
+    @GetMapping("/loginOut")
+    @ApiOperation("退出用户")
+    @PreAuthorize("isAuthenticated()")
+    public Message loginOut() {
+        SecurityContextHolder.clearContext();
+        return new Message(ResponseCodeType.SUCCESS, "退出成功", true);
+    }
 }

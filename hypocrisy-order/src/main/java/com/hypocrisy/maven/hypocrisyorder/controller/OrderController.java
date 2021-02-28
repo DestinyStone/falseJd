@@ -3,6 +3,7 @@ package com.hypocrisy.maven.hypocrisyorder.controller;
 import bean.OmsOrder;
 import com.hypocrisy.maven.hypocrisyorder.service.OmsOrderService;
 import feign.service.FeignCartItemService;
+import io.seata.spring.annotation.GlobalTransactional;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +33,12 @@ public class OrderController {
     @Autowired
     private FeignCartItemService feignCartItemService;
 
-
+    @GetMapping("test")
+    @GlobalTransactional
+    public String test() {
+        System.out.println(333);
+        return "333";
+    }
 
     @GetMapping("/submitOrder")
     @PreAuthorize("isAuthenticated()")

@@ -59,5 +59,6 @@
                 and pms_sku_info.sku_name like #{search} or oms_order.order_sn like #{search}
             </if>
         </where>
+        order by oms_order.create_time desc
     </select>
 </mapper>

@@ -3,14 +3,21 @@ package com.hypocrisy.maven.hypocrisyorder.service.impl;
 import bean.OmsCartItem;
 import bean.OmsOrder;
 import bean.OmsOrderItem;
+import bean.UmsMemberReceiveAddress;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
+import com.github.wujun234.uid.impl.CachedUidGenerator;
+import com.hypocrisy.maven.hypocrisyorder.entity.PollingParam;
 import com.hypocrisy.maven.hypocrisyorder.mapper.OmsOrderItemMapper;
 import com.hypocrisy.maven.hypocrisyorder.mapper.OmsOrderMapper;
+import com.hypocrisy.maven.hypocrisyorder.mq.name.OrderDelayedName;
 import com.hypocrisy.maven.hypocrisyorder.service.OmsOrderService;
 import feign.service.FeignCartItemService;
 import feign.service.FeignUmsMemberService;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import response.Message;
@@ -19,6 +26,7 @@ import utils.RedisUtils;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,74 +52,82 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Autowired
     private FeignUmsMemberService feignUmsMemberService;
 
+    @Autowired
+    private CachedUidGenerator cachedUidGenerator;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
     private String orderNoId = "order_no_id_incr";
 
     private String orderExpireTime = "172800000";
 
     @Override
-    //@GlobalTransactional(name = "genOrder")
+    @GlobalTransactional
     public Message genOrder(String userId, String[] skuIds, String addressId) {
 
-        //System.out.println( RootContext.getXID() + "----------------------------------------");
         List<OmsCartItem> omsCartItemList =  feignCartItemService.selectBySkuIdsAndUserId(userId, skuIds);
-//
-//        if (omsCartItemList.size() == 0)
-//            return new Message(ResponseCodeType.NO_COMMODITY_STORE, "购物车异常", true);
-//
-//        // 查看所有库存是否都满足
-//        if (!hasRepository(omsCartItemList))
-//            return new Message(ResponseCodeType.NO_COMMODITY_STORE, "商品库存不足", true);
-//        // 消减库存
-//        lockRepository(omsCartItemList);
-//
-//        // 获取用户选择的发货地址
-//        UmsMemberReceiveAddress umsMemberReceiveAddressQuery = UmsMemberReceiveAddress.builder().id(addressId).build();
-//        UmsMemberReceiveAddress umsMemberReceiveAddress = feignUmsMemberService.selectOne(umsMemberReceiveAddressQuery);
-//
-//        // 生成订单信息
-//        OmsOrder omsOrder = OmsOrder.builder()
-//                .memberId(userId)
-//                .orderSn(generateOrderSn())
-//                .createTime(new Date())
-//                .totalAmount(computeTotalMoney(omsCartItemList))
-//                .memberUsername(umsMemberReceiveAddress.getName())
-//                .receiverName(umsMemberReceiveAddress.getName())
-//                .receiverPhone(umsMemberReceiveAddress.getPhoneNumber())
-//                .receiverProvince(umsMemberReceiveAddress.getProvince())
-//                .receiverCity(umsMemberReceiveAddress.getCity())
-//                .receiverRegion(umsMemberReceiveAddress.getRegion())
-//                //订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单
-//                .status(0)
-//                .build();
-//
-//        omsOrderMapper.insertSelective(omsOrder);
-//
-//        // 生成订单 Item
-//        List<OmsOrderItem> omsOrderItemListQuery = new ArrayList<>();
-//        for (OmsCartItem omsCartItem : omsCartItemList) {
-//            OmsOrderItem omsOrderItem = OmsOrderItem.builder()
-//                    .orderId(omsOrder.getId())
-//                    .orderSn(omsOrder.getOrderSn())
-//                    .productSkuId(omsCartItem.getProductSkuId())
-//                    .productPrice(omsCartItem.getPrice())
-//                    .productQuantity(omsCartItem.getQuantity())
-//                    .build();
-//            omsOrderItemListQuery.add(omsOrderItem);
-//        }
-//        omsOrderItemMapper.insertList(omsOrderItemListQuery);
+
+        if (omsCartItemList.size() == 0)
+            return new Message(ResponseCodeType.NO_COMMODITY_STORE, "购物车异常", true);
+
+        // 查看所有库存是否都满足
+        if (!hasRepository(omsCartItemList))
+            return new Message(ResponseCodeType.NO_COMMODITY_STORE, "商品库存不足", true);
+        // 消减库存
+        lockRepository(omsCartItemList);
+
+        // 获取用户选择的发货地址
+        UmsMemberReceiveAddress umsMemberReceiveAddressQuery = UmsMemberReceiveAddress.builder().id(addressId).build();
+        UmsMemberReceiveAddress umsMemberReceiveAddress = feignUmsMemberService.selectOne(umsMemberReceiveAddressQuery);
+
+        long uid = cachedUidGenerator.getUID();
+
+        // 生成订单信息
+        OmsOrder omsOrder = OmsOrder.builder()
+                .id(uid + "")
+                .memberId(userId)
+                .orderSn(generateOrderSn())
+                .createTime(new Date())
+                .totalAmount(computeTotalMoney(omsCartItemList))
+                .memberUsername(umsMemberReceiveAddress.getName())
+                .receiverName(umsMemberReceiveAddress.getName())
+                .receiverPhone(umsMemberReceiveAddress.getPhoneNumber())
+                .receiverProvince(umsMemberReceiveAddress.getProvince())
+                .receiverCity(umsMemberReceiveAddress.getCity())
+                .receiverRegion(umsMemberReceiveAddress.getRegion())
+                //订单状态：0->待付款；1->待发货；2->已发货；3->已完成；4->已关闭；5->无效订单
+                .status(0)
+                .build();
+
+        omsOrderMapper.insertSelective(omsOrder);
+
+        // 生成订单 Item
+        List<OmsOrderItem> omsOrderItemListQuery = new ArrayList<>();
+        for (OmsCartItem omsCartItem : omsCartItemList) {
+            OmsOrderItem omsOrderItem = OmsOrderItem.builder()
+                    .orderId(omsOrder.getId())
+                    .orderSn(omsOrder.getOrderSn())
+                    .productSkuId(omsCartItem.getProductSkuId())
+                    .productPrice(omsCartItem.getPrice())
+                    .productQuantity(omsCartItem.getQuantity())
+                    .build();
+            omsOrderItemListQuery.add(omsOrderItem);
+        }
+        omsOrderItemMapper.insertList(omsOrderItemListQuery);
 
         // 删除购物车数据
         for (OmsCartItem omsCartItem : omsCartItemList) {
             feignCartItemService.deleteByPrimaryKey(omsCartItem);
         }
 
-        // 发送延迟队列检测订单是否超时
-        //sendDelayedCheckOrder(omsOrder.getOrderSn());
+        //发送延迟队列检测订单是否超时
+        sendDelayedCheckOrder(omsOrder.getOrderSn());
 
-//        HashMap<String, String> result = new HashMap<>();
-//        result.put("orderNo", omsOrder.getOrderSn());
-        throw new RuntimeException("22222");
-        //return new Message(ResponseCodeType.SUCCESS, result, true);
+        HashMap<String, String> result = new HashMap<>();
+        result.put("orderNo", omsOrder.getOrderSn());
+
+        return new Message(ResponseCodeType.SUCCESS, result, true);
     }
 
     @Override
@@ -145,7 +161,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
     @Override
     public Message getAllOrderDetail(String userId, int page, int size, String filter, String search) {
 
-        if (!StringUtils.isBlank(search)) {
+         if (!StringUtils.isBlank(search)) {
             search = "%" + search + "%";
         }
         // 分页查询订单表 获取 订单id
@@ -251,5 +267,17 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         }
 
         return bigDecimal;
+    }
+
+    private void sendDelayedCheckOrder(String orderSn) {
+        PollingParam pollingParam = new PollingParam();
+        pollingParam.setOrderNo(orderSn);
+        pollingParam.setCurrentNotifyNumber(1);  // 第一次发送
+
+        rabbitTemplate.convertAndSend(OrderDelayedName.ORDER_EXCHANGE_DELAYED, "", JSONObject.toJSONString(pollingParam), message -> {
+            MessageProperties messageProperties = message.getMessageProperties();
+            messageProperties.setDelay(pollingParam.getDelayedTime());
+            return message;
+        });
     }
 }
