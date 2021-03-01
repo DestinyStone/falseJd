@@ -37,6 +37,7 @@ public class PollingParam {
     }
 
     public void init() {
+        notifyInterval = new HashMap<>();
         notifyInterval.put("1", 1000 * 60 * 2);   // 2分钟
         notifyInterval.put("2", 1000 * 60 * 4);   // 4分钟
         notifyInterval.put("3", 1000 * 60 * 8);   // 8分钟

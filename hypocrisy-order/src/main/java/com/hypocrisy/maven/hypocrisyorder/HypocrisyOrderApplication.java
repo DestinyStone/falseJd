@@ -1,7 +1,6 @@
 package com.hypocrisy.maven.hypocrisyorder;
 
 import annon.EnableSecurity;
-import annon.EnableUtils;
 import annon.ImportCommon;
 import io.seata.spring.annotation.datasource.EnableAutoDataSourceProxy;
 import org.springframework.boot.SpringApplication;
@@ -13,7 +12,6 @@ import tk.mybatis.spring.annotation.MapperScan;
 @SpringBootApplication
 @EnableSecurity
 @EnableAutoDataSourceProxy
-@EnableUtils
 public class HypocrisyOrderApplication {
 
     public static void main(String[] args) {

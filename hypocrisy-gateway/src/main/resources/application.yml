@@ -40,6 +40,12 @@ spring:
             - Path=/passport/**
           filters:
             - StripPrefix=1
+        - id: hypocrisy-payment
+          uri: lb://hypocrisy-payment
+          predicates:
+            - Path=/payment/**
+          filters:
+            - StripPrefix=1
   main:
     allow-bean-definition-overriding: true
 server:
